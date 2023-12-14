@@ -1,0 +1,53 @@
+---
+title: "likert"
+format: gfm
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(Manu)
+library(ggplot2)
+```
+
+```{r}
+prepilot <- read_csv("data/dmp-prepilot.csv", locale = locale(encoding = "latin1"))
+postpilot <- read_csv("data/dmp-postpilot.csv", locale = locale(encoding = "latin1"))
+```
+
+```{r}
+prepilot <- prepilot |> 
+  select(c(1, 14:19, 21, 35:40))
+
+prepilot_long <- prepilot |> 
+  pivot_longer(-ID, names_to = "question") |> 
+  group_by(question) |> 
+  count(value) |> 
+  group_by(question) |> 
+  mutate(
+    total = sum(n),
+    pc = n/total,
+  )
+```
+
+```{r}
+# ggplot
+
+ggplot(prepilot_long, aes(x = question , y = pc, fill = value)) +
+  geom_bar(stat="identity", width = 0.7) +
+  scale_fill_manual(values = get_pal("Tui")) +
+  coord_flip() +
+  ylab("%") +
+  xlab("") +
+  theme_classic()
+```
+
+```{r}
+# likert
+
+
+```
+
+
+
