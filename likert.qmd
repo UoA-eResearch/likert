@@ -10,7 +10,6 @@ library(tidyr)
 library(Manu)
 library(ggplot2)
 library(likert)
-library(HH)
 ```
 
 ```{r}
@@ -22,10 +21,10 @@ postpilot <- read_csv("data/dmp-postpilot.csv", locale = locale(encoding = "lati
 # Reshape prepilot data
 
 prepilot <- prepilot |> 
-  select(c(1, 14:19, 21, 35:40))
+  select(c(14:19, 21, 35:40))
 
 prepilot_long <- prepilot |> 
-  pivot_longer(-ID, names_to = "question") |> 
+  pivot_longer(cols = everything(), names_to = "question") |> 
   group_by(question) |> 
   count(value) |> 
   group_by(question) |> 
@@ -70,7 +69,7 @@ colnames(postpilot_wide)[1] = "Item"
 
 postpilot_wide[is.na(postpilot_wide)] <- 0
 
-postpilot_wide <- postpilot_wide[, c(1, 5, 4, 2, 3, 6)]
+postpilot_wide <- postpilot_wide[, c(1, 6, 5, 3, 4, 2)]
 ```
 
 ```{r}
@@ -88,18 +87,20 @@ ggplot(prepilot_long, aes(x = question , y = pc, fill = value)) +
 
 ```{r}
 # likert
-# won't run without a column called 'neutral'
 
-plot(likert(summary = prepilot_wide)) 
+prepilot <- prepilot %>%
+  mutate(across(where(is.character), as.factor))
+
+# plot(likert(items = prepilot)) 
 
 ```
 
 ```{r}
 # HH
 
-likert(Item~., prepilot_wide, ReferenceZero=3, ylab = "", xlab = "", auto.key = list(columns = 1, reverse.rows = T), main = "Title")
+plot(HH::likert(Item~., prepilot_wide, ReferenceZero=3, ylab = "", xlab = "", auto.key = list(columns = 1, reverse.rows = T), main = "Prepilot"))
 
-likert(Item~., postpilot_wide, ReferenceZero=3, ylab = "", xlab = "", auto.key = list(columns = 1, reverse.rows = T), main = "Title")
+plot(HH::likert(Item~., postpilot_wide, ReferenceZero=3, ylab = "", xlab = "", auto.key = list(columns = 1, reverse.rows = T), main = "Postpilot"))
 ```
 
 
